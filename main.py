@@ -1,4 +1,3 @@
-import requests
 import os
 
 from openai import OpenAI
@@ -24,7 +23,7 @@ class MessageRequest(BaseModel):
 @app.post("/threads")
 def threads(request: MessageRequest):
     """
-    Accept a message, contact_id, and optional thread_id from the request body.
+    Accept a message, assistant_id, contact_id, and optional thread_id from the request body.
     Make an external API call, then return the response.
     """
     client = OpenAI(
@@ -47,14 +46,12 @@ def threads(request: MessageRequest):
                         return {
                             "status": "error",
                             "message": f"There is an active run on this thread (status: {latest_run.status}). Please wait for it to complete.",
-                            "thread_id": request.thread_id,
                         }
-            except openai.NotFoundError as e:
+            except openai.NotFoundError as _e:
                 # Handle invalid thread ID
                 return {
                     "status": "error",
-                    "message": "Invalid thread ID provided",
-                    "thread_id": request.thread_id,
+                    "message": f"Invalid thread ID provided {request.thread_id}",
                 }
 
             # Use existing thread
@@ -73,7 +70,6 @@ def threads(request: MessageRequest):
         run = client.beta.threads.runs.create_and_poll(
             thread_id=request.thread_id,
             assistant_id=request.assistant_id,
-            instructions="Please address the user as Jane Doe. The user has a premium account.",
         )
 
         if run.status == "completed":
