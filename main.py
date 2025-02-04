@@ -29,6 +29,18 @@ def threads(request: MessageRequest):
     )
 
     if request.thread_id:
+        # Check for any active runs on the thread
+        runs = client.beta.threads.runs.list(thread_id=request.thread_id)
+        # Get the most recent run (first in the list)
+        if runs.data and len(runs.data) > 0:
+            latest_run = runs.data[0]
+            if latest_run.status in ['queued', 'in_progress', 'requires_action']:
+                return {
+                    "status": "error",
+                    "message": f"There is an active run on this thread (status: {latest_run.status}). Please wait for it to complete.",
+                    "thread_id": request.thread_id
+                }
+
         # Use existing thread
         message = client.beta.threads.messages.create(
             thread_id=request.thread_id,
