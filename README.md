@@ -9,7 +9,21 @@ This repository contains a basic setup for a FastAPI application in Python. It p
 
 ## Getting Started
 
-Start Server
+1. Create `.env` file
+
+```bash
+cp .env .env.example
+```
+
+2. Add OpenAI API key in `.env` file
+
+3. Source `.env` file
+
+```bash
+source .env
+```
+
+4. Start Server
 
 ```bash
 fastapi dev main.py
